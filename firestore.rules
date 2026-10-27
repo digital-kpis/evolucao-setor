@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Só e-mails desta lista leem e gravam. Troque pelos e-mails reais.
+    function autorizado() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'seu.email@exemplo.com',
+          'outra.pessoa@exemplo.com'
+        ];
+    }
+
+    match /dias/{dia}      { allow read, write: if autorizado(); }
+    match /config/{doc}    { allow read, write: if autorizado(); }
+
+    // Todo o resto é bloqueado
+    match /{document=**}   { allow read, write: if false; }
+  }
+}
